@@ -7,8 +7,8 @@
 
 printf "\n\nView in Chrome: http://0.0.0.0:8001/index.html?p=talk.md\n\n"
 
-python3.6 -m http.server 8001
-# python3 -m http.server 8001
+# python3.6 -m http.server 8001
+python3 -m http.server 8001
 
 # Firefox
 #
@@ -26,5 +26,5 @@ python3.6 -m http.server 8001
 
 # Convert to PDF with decktape (using the Docker image)
 # docker run --rm -v $PWD:/slides/ astefanutti/decktape \
-#     https://matthewfeickert.github.io/talk-AML-pyhf/index.html?p=talk.md \
+#     https://matthewfeickert.github.io/talk-AML-workshop-2018/index.html?p=talk.md \
 #     talk.pdf
