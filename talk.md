@@ -9,7 +9,7 @@ count: false
 Matthew Feickert<br>
 [matthew.feickert@cern.ch](mailto:matthew.feickert@cern.ch)
 
-[3rd ATLAS Machine Learning Workshop](https://indico.cern.ch/event/735932/timetable/?view=standard#12-pyhf-a-pure-python-implemen)
+[3rd ATLAS Machine Learning Workshop](https://indico.cern.ch/event/735932/contributions/3136879/)
 
 October 16th, 2018
 
