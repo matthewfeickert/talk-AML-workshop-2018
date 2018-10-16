@@ -57,6 +57,7 @@ NYU
 <br>
 
 - First non-ROOT implementation of the HistFactory p.d.f. template
+   - [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1169739.svg)](https://doi.org/10.5281/zenodo.1169739)
    - pure-Python library
       - [`pip install pyhf`](https://diana-hep.org/pyhf/installation.html#install-from-pypi)
    - machine learning frameworks as computational backends
@@ -68,6 +69,7 @@ NYU
    - Originated from a [DIANA/HEP](https://diana-hep.org/) project fellowship
    - Not experiment specific (though designed by ATLAS physicists)
    - Have contributions from [CMS members](https://github.com/diana-hep/pyhf/commit/4159c2dbc9ed7a9b3866e9b127d885d696314754) and [strong interest by theorists](https://indico.cern.ch/event/689514/contributions/2961925/)
+   - Used for reinterpretation in phenomenology paper [1]
 
 ---
 
@@ -77,7 +79,7 @@ NYU
 
 - A flexible p.d.f. template to build statistical models from binned distributions and data
 <!-- - Developed by Cranmer, et al. [1] -->
-- Developed by Cranmer, Lewis, Moneta, Shibata, and Verkerke [1]
+- Developed by Cranmer, Lewis, Moneta, Shibata, and Verkerke [2]
 - Widely used by the HEP community for standard model measurements and BSM searches
    <!-- - Show public summary plots and link to references that use HistFactory (multi b-jets for example) -->
 
@@ -322,6 +324,60 @@ $ pyhf xml2json /path/to/config.xml > hf.json
 ]
 ]
 
+---
+
+# _Preliminary_ Benchmarking
+
+.grid[
+.kol-1-2[
+
+- Changing with many updates
+- For a single channel with $n$ nuisance parameters already seeing performance boosts
+- For many channels ROOT .bold[was] faster. With latest PRs `pyhf` now faster than ROOT in all cases.
+- Needs to be revisited with recent updates that properly .bold[implement vectorization] and graph structure
+   - Seeing over a $100x$ speedup to that seen in image
+- Still need to finish benchmarking on GPUs
+   - Already see a $10x$ speedup
+
+]
+.kol-1-2[
+.width-100[![single_channel_benchmark](figures/benchmark_times.png)]
+
+_old benchmark_: Single channel fit with $n$ bins (uncorrelated nuisance parameters) with CPU backends. Lower is better.
+]
+]
+
+---
+
+# Realistic Example Use Case
+
+<br>
+
+.blue[CPU NumPy backend of `pyhf`] vs. .red[ROOT HistFactory] on ATLAS multi b-jet Analysis
+  - multi b-jet `HistFitter` configuration has 23 Channels
+
+<br>
+
+```
+$ time pyhf cls mbj.json | jq .CLs_obs
+0.2614638795780821
+```
+.blue[`16.32s user 0.93s system 95% cpu 18.152 total`]
+
+```
+$ time root_cls.py atlas-conf-2018-041/workspace.root | jq .CLs_obs
+0.25606989834647437
+```
+.red[`40.01s user 1.38s system 86% cpu 47.978 total`]
+
+---
+
+# Use in Reinterpretation
+
+.center.width-90[[![arxViv_header](figures/arXiv_1810-05648_header.png)](https://inspirehep.net/record/1698425)]
+
+.center.width-90[[![arxViv_text](figures/pyhf_use_text.png)](https://arxiv.org/pdf/1810.05648.pdf#page=21)]
+.center.width-40[[![arxViv_tweet_GIF](figures/pyhf_arXiv.gif)](https://twitter.com/lukasheinrich_/status/1052142936803160065)]
 
 ---
 
@@ -414,52 +470,6 @@ $ pyhf cls demo.json --patch new_signal.json | jq .CLs_obs
 
 ---
 
-# _Preliminary_ Benchmarking
-
-.grid[
-.kol-1-2[
-
-- Changing with many updates
-- For a single channel with $n$ nuisance parameters already seeing performance boosts
-- For many channels ROOT .bold[was] faster. With latest PRs `pyhf` now faster than ROOT in all cases.
-- Needs to be revisited with recent updates that properly .bold[implement vectorization] and graph structure
-   - Seeing over a $100x$ speedup to that seen in image
-- Still need to finish benchmarking on GPUs
-   - Already see a $10x$ speedup
-
-]
-.kol-1-2[
-.width-100[![single_channel_benchmark](figures/benchmark_times.png)]
-
-_old benchmark_: Single channel fit with $n$ bins (uncorrelated nuisance parameters) with CPU backends. Lower is better.
-]
-]
-
----
-
-# Realistic Example Use Case
-
-<br>
-
-.blue[CPU NumPy backend of `pyhf`] vs. .red[ROOT HistFactory] on ATLAS multi b-jet Analysis
-  - multi b-jet `HistFitter` configuration has 23 Channels
-
-<br>
-
-```
-$ time pyhf cls mbj.json | jq .CLs_obs
-0.2614638795780821
-```
-.blue[`16.32s user 0.93s system 95% cpu 18.152 total`]
-
-```
-$ time root_cls.py atlas-conf-2018-041/workspace.root | jq .CLs_obs
-0.25606989834647437
-```
-.red[`40.01s user 1.38s system 86% cpu 47.978 total`]
-
----
-
 # Development
 
 <br>
@@ -505,9 +515,37 @@ Upcoming:
 
 ---
 
+class: end-slide, center
+
+Backup
+
+---
+
+# Will `pyhf` extend to unbinned models?
+
+<br>
+
+- The project scope is to implement HistFactory as best as possible. While implementing unbinned models is not an impossibility, it is not in the project goals at the current time.
+- There are already projects like [GooFit](https://github.com/GooFit/GooFit), which nicely handle unbinned models.
+   - [![DOI](https://zenodo.org/badge/9017446.svg)](https://zenodo.org/badge/latestdoi/9017446)
+- While [contributions are welcome](https://github.com/diana-hep/pyhf/blob/master/CONTRIBUTING.md), it might be worth starting a different project or contributing to projects already focused on unbinned models.
+
+---
+
+# The JSON has both the modifiers and the data. Is this a good idea?
+
+<br>
+
+- The `pyhf` dev team views this as a good feature, not a bug.
+- However, the `pyhf` dev team is considering using parts of [`histbook`](https://github.com/scikit-hep/histbook) in the future, leading to some separation.
+   - [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1321926.svg)](https://doi.org/10.5281/zenodo.1321926)
+
+---
+
 # References
 
-1. ROOT collaboration, K. Cranmer, G. Lewis, L. Moneta, A. Shibata and W. Verkerke, .italic[[HistFactory: A tool for creating statistical models for use with RooFit and RooStats](http://inspirehep.net/record/1236448)], 2012.
+1. L. Heinrich, H. Schulz, J. Turner and Y. Zhou, .italic[[Constraining $A_{4}$ Leptonic Flavour Model Parameters at Colliders and Beyond](https://inspirehep.net/record/1698425)], 2018.
+2. ROOT collaboration, K. Cranmer, G. Lewis, L. Moneta, A. Shibata and W. Verkerke, .italic[[HistFactory: A tool for creating statistical models for use with RooFit and RooStats](http://inspirehep.net/record/1236448)], 2012.
 
 ---
 
@@ -515,9 +553,3 @@ class: end-slide, center
 count: false
 
 The end.
-
----
-
-class: end-slide, center
-
-Backup
